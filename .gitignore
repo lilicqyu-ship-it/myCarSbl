@@ -1,0 +1,21 @@
+# 构建输出（AURIX Development Studio / TASKING；注意：不能裸写 Debug/，
+# 否则会误伤 Configurations/Debug/sync_on_halt.c 这个调试源文件）
+/Debug/
+/Release/
+TriCore Debug/
+*.o
+*.d
+*.src
+*.obj
+*.elf
+*.hex
+*.map
+*.mdf
+*.lst
+*.srec
+*.dump
+
+# 备份与临时文件
+*.bak
+*.tmp
+Thumbs.db
