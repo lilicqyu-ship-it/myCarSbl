@@ -39,6 +39,19 @@
                                                      * or 200000000 */
 
 /*********************************************************************************************************************/
+/*---------------------------------Configuration for the SBL build (doc 24 SS3.1)--------------------------------------*/
+/*********************************************************************************************************************/
+/* This project builds the SECONDARY BOOTLOADER, not the App:
+ *  - CPU1/2 are never started here; the App's own CStart releases them. The
+ *    Cpu1/Cpu2 template mains stay compiled for link completeness only.
+ *  - BMHD1 (0x80020000) is outside the SBL's 32 KB region and inside App
+ *    slot A - the App linker files keep that area free of loadable code
+ *    (see Lcf_AppA.lsl). BMHD0 stays, the SBL owns the reset vector. */
+#define IFX_CFG_CPU_CSTART_ENABLE_TRICORE1   (0)
+#define IFX_CFG_CPU_CSTART_ENABLE_TRICORE2   (0)
+#define IFX_CFG_CPUCSTART_BMI01_NOT_NEEDED   1
+
+/*********************************************************************************************************************/
 /*-----------------------------------Configuration for Software managed interrupt------------------------------------*/
 /*********************************************************************************************************************/
 /* #define IFX_USE_SW_MANAGED_INT */ /* Decomment this line if the project needs to use Software managed interrupts */

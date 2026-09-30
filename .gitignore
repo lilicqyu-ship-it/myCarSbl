@@ -19,3 +19,12 @@ TriCore Debug/
 *.bak
 *.tmp
 Thumbs.db
+
+# host 测试产物（可执行与中间文件；不带扩展名的 gcc 输出逐个列出）
+test/host/*.exe
+test/host/test_tcfw
+test/host/test_ota_boot
+test/host/test_ota_frames
+test/host/test_ota_meta
+test/host/test_ota_rx
+test/host/*.o
