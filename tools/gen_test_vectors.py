@@ -2,7 +2,7 @@
 """Generate test/host/test_vectors.h for the TCFW bundle host tests.
 
 Builds a deterministic signed "TCFW" bundle exactly the way the C6 signing
-tool (c6_car tools/sign_bundle.py) builds "C6FW" bundles: header fields LE,
+tool (esp32c6_car tools/sign_bundle.py) builds "C6FW" bundles: header fields LE,
 ed25519 signature over the FIRST 84 bytes, payload digest = SHA-512[:32].
 The app image is LCG-generated so the bytes are reproducible without
 shipping a binary blob, and its length is deliberately not page-aligned
@@ -19,12 +19,12 @@ import sys
 import zlib
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(REPO, os.pardir, "c6_car", "tools"))
+sys.path.insert(0, os.path.join(REPO, os.pardir, "esp32c6_car", "tools"))
 import ed25519_ref as ed  # noqa: E402
 
 HDR_LEN = 148
 SIGNED_LEN = 84
-SEED = bytes.fromhex(open(os.path.join(REPO, os.pardir, "c6_car", "tools",
+SEED = bytes.fromhex(open(os.path.join(REPO, os.pardir, "esp32c6_car", "tools",
                                        "keys", "ed25519_dev.seed")).read().strip())
 OTHER_SEED = bytes(range(32))          # never a real key, just a different one
 

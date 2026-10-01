@@ -2,7 +2,7 @@
  * test_ota_frames.c - G-OTA-2: SF OTA frame codec host tests
  *
  * Asserts the exact byte layout of the OTA channels against the values the
- * C6 side produces (c6_car components/c6_link/link.c v2_to_sf /
+ * C6 side produces (esp32c6_car components/c6_link/link.c v2_to_sf /
  * link_send_ota_chunk and components/c6_proto/proto_frames.h):
  *   BEGIN  TYPE 0x06 CID 0x30 payload {u32 total LE, u32 crc32 LE}
  *   CHUNK  TYPE 0x06 CID 0x31 payload {u16 idx LE, data <= 240}

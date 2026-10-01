@@ -34,7 +34,7 @@
 #include "Ifx_Types.h"
 #include "IfxCpu.h"
 #include "IfxScuWdt.h"
-#include "Blinky_LED.h"
+#include "sbl_led.h"
 #include "sbl/sbl_boot.h"
 
 /* Referenced by the Cpu1/Cpu2 template mains (kept compiled, never started:

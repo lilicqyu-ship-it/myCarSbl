@@ -1,5 +1,5 @@
 /**********************************************************************************************************************
- * \file Blinky_LED.h
+ * \file sbl_led.c
  * \copyright Copyright (C) Infineon Technologies AG 2019
  *
  * Use of this file is subject to the terms of use agreed between (i) you or the company in which ordinary course of
@@ -25,13 +25,34 @@
  * IN THE SOFTWARE.
  *********************************************************************************************************************/
 
-#ifndef BLINKY_LED_H_
-#define BLINKY_LED_H_
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Includes------------------------------------------------------*/
+/*********************************************************************************************************************/
+#include "IfxPort.h"
+#include "Bsp.h"
 
 /*********************************************************************************************************************/
-/*------------------------------------------------Function Prototypes------------------------------------------------*/
+/*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
-void initLED(void);
-void blinkLED(void);
+#define LED         &MODULE_P00,5                                           /* LED: Port, Pin definition            */
+#define WAIT_TIME   500                                                     /* Wait time constant in milliseconds   */
 
-#endif /* BLINKY_LED_H_ */
+/*********************************************************************************************************************/
+/*---------------------------------------------Function Implementations----------------------------------------------*/
+/*********************************************************************************************************************/
+/* This function initializes the port pin which drives the LED */
+void initLED(void)
+{
+    /* Initialization of the LED used in this example */
+    IfxPort_setPinModeOutput(LED, IfxPort_OutputMode_pushPull, IfxPort_OutputIdx_general);
+
+    /* Switch OFF the LED (low-level active) */
+    IfxPort_setPinHigh(LED);
+}
+
+/* This function toggles the port pin and wait 500 milliseconds */
+void blinkLED(void)
+{
+    IfxPort_togglePin(LED);                                                     /* Toggle the state of the LED      */
+    waitTime(IfxStm_getTicksFromMilliseconds(BSP_DEFAULT_TIMER, WAIT_TIME));    /* Wait 500 milliseconds            */
+}

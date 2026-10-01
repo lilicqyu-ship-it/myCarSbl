@@ -1,4 +1,4 @@
-# myCarSbl — TC275 OTA 二级引导（SBL）工程
+# tc275_sbl — TC275 OTA 二级引导（SBL）工程
 
 智能车 TC275 主控的 OTA 升级引导程序：上电由 SBL 接管 reset 向量，读取
 DFlash 中的 OTA 元数据，决定跳入 PFlash 双 bank（Slot A / Slot B）中的哪个
@@ -20,7 +20,7 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
   AppB `.start`@0x80208020（槽基址+0x20 入口约定）
 - ⬜ 上板项 G-OTA-3/4/5/6：ADS 构建烧录、SBL→App 跳转小样、写 B 换槽回滚、
   传输中断/验签失败/自检失败三种回滚路径、掉电恢复
-- ✅ myCar（App 工程）已接入（另一仓库，独立提交）：默认 lsl 换为槽 A 布局
+- ✅ tc275_car（App 工程）已接入（另一仓库，独立提交）：默认 lsl 换为槽 A 布局
   （入口 0x80008020，冒烟链接验证）+ `Lcf_AppB.lsl`；`com/ota_app.c` 装配
   OtaRxOps（槽位自识别/flash/元数据/复位/LINK_send）与 §5.2 自检确认；
   `link.c` 分发 OTA 帧；`protocol.h` 补 PROTO_CMD_OTA_*；mw/ota、mw/crypto、
@@ -34,14 +34,15 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 | `sbl/sbl_boot.[ch]` | §5.1 引导决策落地：元数据加载→决策→LED 信号→跳槽/安全态 |
 | `bsp/flash_ota.[ch]` | IfxFlash 封装：槽扇区擦除、32B 页 staging 写、DFlash 元数据后端、入口探测 |
 | `mw/ota/` | 可移植 OTA 栈（纯 C99，host/TriCore 同源编译）：`ota_layout.h` 地址真源、`ota_meta` 双页、`ota_boot` 决策、`tcfw_bundle` 验签、`ota_rx` 接收状态机、`crc32`、`ota_keys.h` 公钥 |
-| `mw/crypto/` | `ed25519v`/`sha512`/`c6_consts` — 自 c6_car 逐字拷贝（验签与 C6 共用真源） |
-| `mw/sf/sf_frame.h` | SF 帧编码头 — 自 myCar 逐字拷贝（线格式真源） |
-| `test/host/sf_frame.c` | SF 帧编解码实现 — 同样逐字拷贝；只由 host 测试编译（myCar 有自己的正本，SBL 镜像不引用） |
+| `mw/crypto/` | `ed25519v`/`sha512`/`c6_consts` — 自 esp32c6_car 逐字拷贝（验签与 C6 共用真源） |
+| `mw/sf/sf_frame.h` | SF 帧编码头 — 自 tc275_car 逐字拷贝（线格式真源） |
+| `test/host/sf_frame.c` | SF 帧编解码实现 — 同样逐字拷贝；只由 host 测试编译（tc275_car 有自己的正本，SBL 镜像不引用） |
 | `Lcf_SBL.lsl` | **本工程构建用**：SBL 定位 32 KB（0x80000000..0x80007FFF） |
-| `Lcf_AppA.lsl` / `Lcf_AppB.lsl` | App 槽 linker（给 myCar 工程切换构建；App 不占物理 reset） |
+| `Lcf_AppA.lsl` / `Lcf_AppB.lsl` | App 槽 linker（给 tc275_car 工程切换构建；App 不占物理 reset） |
 | `test/host/` | host 单测 + mock 后端 + `make check` |
 | `tools/` | `gen_test_vectors.py`（TCFW 测试向量）、`build_sbl.sh`（命令行编译验证） |
-| `Cpu1/2_Main.c`、`Blinky_LED.c` | 模板遗留（Cpu1/2 不被 SBL 启动，仅为链接完整保留） |
+| `Cpu1/2_Main.c` | 模板遗留（SBL 不启动 CPU1/2，保留以提供 g_cpuSyncEvent 同步事件） |
+| `sbl_led.c/h` | 原 Blinky_LED 模板改名；LED 决策指示/安全模式闪烁在用（Cpu0 调 initLED） |
 | `Libraries/`、`Configurations/` | Infineon iLLD（TC27D）与芯片配置 |
 | `doc/` | 设计文档 |
 
@@ -52,7 +53,7 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 | SBL | 0x80000000..0x80007FFF | 32 KB | 持有 reset 向量，永不参与 OTA |
 | Slot A | 0x80008000..0x801FFFFF | 2040 KB | PF0 S2..S26，出厂镜像 |
 | Slot B | 0x80208000..0x803FFFFF | 2040 KB | PF1 S2..S26，OTA 目标槽（镜像对称） |
-| OtaMeta | DFlash0 0xAF01A000 / 0xAF01C000 | 2×8 KB | 双页提交；扇区 15 归 myCar calib |
+| OtaMeta | DFlash0 0xAF01A000 / 0xAF01C000 | 2×8 KB | 双页提交；扇区 15 归 tc275_car calib |
 
 槽入口 = 槽基址 + 0x20（App 的 `.start` 段，镜像 BMHD 约定），SBL 跳该地址。
 
@@ -68,9 +69,9 @@ Project Properties → C/C++ Build → Compiler → Include paths 里能看到�
 
 ```sh
 # 两边各自构建出 hex 后：
-python tools/merge_hex.py Debug/factory_full.hex Debug/myCarSbl.hex <myCar的AppA.hex>
+python tools/merge_hex.py Debug/factory_full.hex Debug/tc275_sbl.hex <tc275_car的AppA.hex>
 # 或构建 SBL 时直接带参：
-sh tools/build_sbl.sh "../myCar/TriCore Debug (TASKING)/myCar.hex"
+sh tools/build_sbl.sh "../tc275_car/TriCore Debug (TASKING)/tc275_car.hex"
 # 可选 --bin Debug/factory_full.bin 输出整片二进制（空隙 0xFF 填充）
 ```
 
@@ -82,8 +83,8 @@ sh tools/build_sbl.sh "../myCar/TriCore Debug (TASKING)/myCar.hex"
 
 ```sh
 python tools/flash.py devices                                   # 支持的器件列表
-python tools/flash.py flash Debug/myCarSbl.hex                  # 单独烧 SBL
-python tools/flash.py factory "../myCar/TriCore Debug (TASKING)/myCar.hex"
+python tools/flash.py flash Debug/tc275_sbl.hex                  # 单独烧 SBL
+python tools/flash.py factory "../tc275_car/TriCore Debug (TASKING)/tc275_car.hex"
                                                                 # 合成+整包烧录一步到位
 ```
 
@@ -104,12 +105,12 @@ cd test/host
 make check        # CC 默认 C:/msys64/ucrt64/bin/gcc，可 CC=gcc 覆盖
 ```
 
-测试向量由 `python tools/gen_test_vectors.py` 生成（依赖 c6_car 的
+测试向量由 `python tools/gen_test_vectors.py` 生成（依赖 esp32c6_car 的
 ed25519 参考实现与 dev 密钥；`test_vectors.h` 已提交，格式或密钥变更时重生成）。
 
 ## 首次上板步骤（G-OTA-3 起）
 
-1. ADS 分别构建 SBL 与 myCar（槽 A 布局，产物即 AppA hex）
+1. ADS 分别构建 SBL 与 tc275_car（槽 A 布局，产物即 AppA hex）
 2. 合成整包 `Debug/factory_full.hex`（SBL@0x80000000 + AppA@0x80008000，
    见上节），调试器/AURIXFlasher 一次烧录即可；也可分开烧两个 hex
 3. 上电：无元数据时 SBL 探测 Slot A 入口非擦除态 → 闪 1 下 → 跳 A

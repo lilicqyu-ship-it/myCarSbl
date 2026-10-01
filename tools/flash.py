@@ -16,9 +16,9 @@ is that thin wrapper plus two conveniences for the OTA layout:
 
 Examples:
   python tools/flash.py devices
-  python tools/flash.py flash Debug/myCarSbl.hex
-  python tools/flash.py flash "TriCore Debug (TASKING)/myCar.hex" --id 0
-  python tools/flash.py factory "../myCar/TriCore Debug (TASKING)/myCar.hex"
+  python tools/flash.py flash Debug/tc275_sbl.hex
+  python tools/flash.py flash "TriCore Debug (TASKING)/tc275_car.hex" --id 0
+  python tools/flash.py factory "../tc275_car/TriCore Debug (TASKING)/tc275_car.hex"
 
 Raw CLI (what this passes through), notable options:
   -hex <f>|-elf <f>  image to program          -id <n>     DAS port index
@@ -96,7 +96,7 @@ def cmd_flash(exe, a):
 
 
 def cmd_factory(exe, a):
-    sbl = a.sbl if a.sbl else os.path.join(REPO, 'Debug', 'myCarSbl.hex')
+    sbl = a.sbl if a.sbl else os.path.join(REPO, 'Debug', 'tc275_sbl.hex')
     if not os.path.isfile(sbl):
         sys.exit('SBL hex not found: %s (build the SBL first)' % sbl)
     if not os.path.isfile(a.app):
@@ -140,8 +140,8 @@ def main():
     p_flash.add_argument('--script', help='extra TAS script to run afterwards')
 
     p_fact = sub.add_parser('factory', help='merge SBL+App hex and flash it')
-    p_fact.add_argument('app', help='App slot-A hex (e.g. myCar build output)')
-    p_fact.add_argument('--sbl', help='SBL hex (default Debug/myCarSbl.hex)')
+    p_fact.add_argument('app', help='App slot-A hex (e.g. tc275_car build output)')
+    p_fact.add_argument('--sbl', help='SBL hex (default Debug/tc275_sbl.hex)')
     p_fact.add_argument('--out', default=os.path.join(REPO, 'Debug', 'factory_full.hex'),
                         help='merged file to flash')
 

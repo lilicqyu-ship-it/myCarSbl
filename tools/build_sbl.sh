@@ -11,9 +11,9 @@
 # support standalone"); the full TASKING v6.3r1 install on this bench does.
 # Newer major version than ADS's 1.1r8 - this build is a compile/link
 # validation, the authoritative binary still comes from ADS.
-# Optional argument: path to an App slot-A hex (e.g. myCar's build output);
+# Optional argument: path to an App slot-A hex (e.g. tc275_car's build output);
 # the script then also emits Debug/factory_full.hex = SBL + App in ONE file
-# for whole-chip flashing:  sh tools/build_sbl.sh ../myCar/"TriCore Debug (TASKING)"/myCar.hex
+# for whole-chip flashing:  sh tools/build_sbl.sh ../tc275_car/"TriCore Debug (TASKING)"/tc275_car.hex
 set -e
 
 CTC="/c/Program Files/TASKING/TriCore v6.3r1/ctc/bin"
@@ -33,7 +33,7 @@ s = open('.cproject', encoding='utf8').read()
 m = re.search(r'<entry excluding="([^"]+)"', s)
 excl = set(m.group(1).split('|')) if m else set()
 out = []
-for f in ('Cpu0_Main.c', 'Cpu1_Main.c', 'Cpu2_Main.c', 'Blinky_LED.c',
+for f in ('Cpu0_Main.c', 'Cpu1_Main.c', 'Cpu2_Main.c', 'sbl_led.c',
           'sbl/sbl_boot.c', 'bsp/flash_ota.c',
           'mw/ota/crc32.c', 'mw/ota/ota_meta.c', 'mw/ota/ota_boot.c',
           'mw/ota/tcfw_bundle.c', 'mw/ota/ota_rx.c',
@@ -65,18 +65,18 @@ for f in $SRCS; do
 done
 
 OBJS=$(find "$OUT/Libraries" "$OUT/Configurations" "$OUT/sbl" "$OUT/bsp" "$OUT/mw" -name '*.o' | tr '\\' '/'; \
-       for x in Cpu0_Main Cpu1_Main Cpu2_Main Blinky_LED; do [ -f "$OUT/$x.o" ] && echo "$OUT/$x.o"; done; true)
+       for x in Cpu0_Main Cpu1_Main Cpu2_Main sbl_led; do [ -f "$OUT/$x.o" ] && echo "$OUT/$x.o"; done; true)
 
-echo "link myCarSbl.elf ($(echo "$OBJS" | wc -l) objects)"
+echo "link tc275_sbl.elf ($(echo "$OBJS" | wc -l) objects)"
 "$CTC/cctc" --lsl-file="Lcf_SBL.lsl" -Wl-Oc -Wl-OL -Wl-Ot -Wl-Ox -Wl-Oy \
-    -Wl--map-file="$OUT/myCarSbl.map" -Wl-mc -Wl-mf -Wl-mi -Wl-mk -Wl-ml -Wl-mm -Wl-md -Wl-mr -Wl-mu \
+    -Wl--map-file="$OUT/tc275_sbl.map" -Wl-mc -Wl-mf -Wl-mi -Wl-mk -Wl-ml -Wl-mm -Wl-md -Wl-mr -Wl-mu \
     --no-warnings= -Wl--error-limit=42 --fp-model=3 -lrt --lsl-core=vtc --exceptions --strict \
-    --anachronisms --force-c++ -Ctc27xd -o"$OUT/myCarSbl.elf" -Wl-o"$OUT/myCarSbl.hex:IHEX" \
+    --anachronisms --force-c++ -Ctc27xd -o"$OUT/tc275_sbl.elf" -Wl-o"$OUT/tc275_sbl.hex:IHEX" \
     $OBJS
 
-"$CTC/elfsize" "$OUT/myCarSbl.elf"
-echo "hex: $(ls -l $OUT/myCarSbl.hex | awk '{print $5}') bytes"
+"$CTC/elfsize" "$OUT/tc275_sbl.elf"
+echo "hex: $(ls -l $OUT/tc275_sbl.hex | awk '{print $5}') bytes"
 
 if [ -n "$1" ]; then
-    python tools/merge_hex.py "$OUT/factory_full.hex" "$OUT/myCarSbl.hex" "$1"
+    python tools/merge_hex.py "$OUT/factory_full.hex" "$OUT/tc275_sbl.hex" "$1"
 fi

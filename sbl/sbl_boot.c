@@ -20,7 +20,7 @@
 #include "../mw/ota/ota_layout.h"
 #include "../mw/ota/ota_meta.h"
 
-/* P00.5, the lite kit LED (same pin Blinky_LED.c drives), active low. */
+/* P00.5, the lite kit LED (same pin sbl_led.c drives), active low. */
 #define SBL_LED_PORT       &MODULE_P00
 #define SBL_LED_PIN        5
 

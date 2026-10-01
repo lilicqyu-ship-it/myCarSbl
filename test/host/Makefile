@@ -1,8 +1,8 @@
-# host unit tests for the myCarSbl OTA software (doc 24 gates G-OTA-1/2,
+# host unit tests for the tc275_sbl OTA software (doc 24 gates G-OTA-1/2,
 # plus meta/boot/rx logic). Any C99 compiler works; on this bench:
 #   /c/msys64/ucrt64/bin/gcc
 #
-# The TCFW test vectors are generated from the c6_car dev key:
+# The TCFW test vectors are generated from the esp32c6_car dev key:
 #   python tools/gen_test_vectors.py
 # (test_vectors.h is committed, regeneration is only needed when the bundle
 # format or the key changes.)
