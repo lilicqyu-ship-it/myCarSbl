@@ -2,7 +2,7 @@
 
 | 项 | 值 |
 |---|---|
-| 状态 | **已实现（软件层）** — SBL/双 bank linker/OTA 协议栈已落地：host 单测 G-OTA-1/2 全绿，SBL 经 TASKING（v6.3r1 命令行）编译链接验证 ≤32 KB；**尚未上板**（G-OTA-3/4/5/6 的硬件半边仍待 ADS 工程构建 + 板上验证） |
+| 状态 | **已实现（软件层，App 侧已接线）** — SBL/双 bank linker/OTA 协议栈已落地，myCar 工程已切换槽 A 构建（冒烟链接 .start@0x80008020）并接入 OTA 接收/自检确认：host 单测 G-OTA-1/2 全绿，SBL 经 TASKING（v6.3r1 命令行）编译链接验证 ≤32 KB；**尚未上板**（G-OTA-3/4/5/6 的硬件半边仍待 ADS 工程构建 + 板上验证） |
 | 需求追溯 | 需求 F05（双板 OTA：TC275 双 bank 切换 + 失败自动回滚，签名验签） |
 | 依赖契约 | SF 帧 `mw/sf/sf_frame.h`（OTA_DATA/OTA_CTRL）、C6 `components/c6_ota/bundle.h`（包格式基线） |
 | 硬件 | TC275 AURIX 三核 200 MHz，**2×2 MB PFlash（PF0/PF1 双 bank）**，128 KB DFlash0 + 64 KB DFlash1 |
@@ -20,7 +20,8 @@
 > | §6 TCFW 包 | `mw/ota/tcfw_bundle.[ch]`（84B 验签 + SHA-512[:32]，与 C6 sign_bundle.py 逐字节一致，host 测） |
 > | §7 PFlash 擦写 | `bsp/flash_ota.[ch]`（IfxFlash 封装：扇区表遍历擦除、32B 页 staging、读回校验） |
 > | 加解密 | `mw/crypto/`（ed25519v/sha512/c6_consts 自 c6_car 逐字拷贝）+ `mw/sf/sf_frame.[ch]`（自 myCar 拷贝） |
-> | host 测试 | `test/host/`（282 断言全绿：`make check`）+ `tools/gen_test_vectors.py` |
+> | App 侧接入（myCar 工程） | `Lcf_Tasking_Tricore_Tc.lsl` 换为槽 A 布局（入口 0x80008020）+ `Lcf_AppB.lsl`；`com/ota_app.[ch]`（OtaRxOps 装配 + 槽位自识别 + §5.2 自检确认）；`com/link.c` OTA 帧分发到 `OTARX_frame`；`Cpu2_Main.c` init/tick；`mw/proto/protocol.h` 补 PROTO_CMD_OTA_*（0x60..0x65）；mw/ota、mw/crypto、bsp/flash_ota 与 SBL 工程同源拷贝 |
+| host 测试 | `test/host/`（282 断言全绿：`make check`）+ `tools/gen_test_vectors.py` |
 > | 构建脚本 | `tools/build_sbl.sh`（本机完整版 TASKING v6.3r1 命令行验证；正式产物仍应从 ADS 出） |
 >
 > 对原设计的**修正**（核对代码/手册后确认，详见各节内标注）：PF1 基址、TCFW 签名范围、§5.1 的 DFlash 磨写细化。
@@ -203,9 +204,9 @@ TriCore PFlash 写入硬约束（实现时严格遵守，否则 ECC/时序错）
 
 ---
 
-## 8. link.c / protocol.c 改动点（协议接收层，可 host 测 — 本仓库已备好待接入 myCar）
+## 8. link.c / protocol.c 改动点（协议接收层，host 测 + myCar 已接入）
 
-1. `link.c:link_dispatch`：新增 `SF_TYPE_OTA_DATA/OTA_CTRL` 分支，不再 `unhandledType++`；解析 CID `OTA_BEGIN/CHUNK/ABORT/SWAP`，转入 `OTARX_frame()`（本仓库 `mw/ota/ota_rx.c` 已实现全部状态机与回帧，myCar 侧只需注入 `OtaRxOps`：activeSlot/flash/meta/reset/LINK_send 五类回调）。
+1. ✅ `link.c:link_dispatch`：新增 `SF_TYPE_OTA_DATA/OTA_CTRL` 分支（不再 `unhandledType++`），转入 `OTARX_frame()`；myCar 的 `com/ota_app.c` 注入全部回调（槽位自识别、flash_ota、元数据、`IfxCpu_triggerSwReset`、`LINK_send`）。全部 OTA 状态驻留 CPU2（链路核），无需跨核加锁；CPU2 看门狗按设计禁用，扇区擦除的长等待不会触发复位。
 2. 新增 `mw/ota/ota_rx.[ch]`：§5.3 状态机 + bundle 验签 + 调 `flash_ota` + 组 `OTA_ACK/OTA_STATUS` 回帧。
 3. `protocol.h`：补齐 `PROTO_CMD_OTA_*`(0x60–0x65) 常量（对齐 C6，见 F7 命令表统一）。
 4. TX 路径：`OTA_ACK`(TYPE_OTA_CTRL,CID 0x32)、`OTA_STATUS`(0x33) 经 link TX 队列回发。

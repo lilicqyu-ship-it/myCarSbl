@@ -10,8 +10,8 @@
 
 #include <string.h>
 
-#include "Bsp.h"
 #include "IfxFlash.h"
+#include "IfxStm.h"    /* STM0 tick for the erase/program timeout window  */
 #include "IfxFlash_cfg.h"
 #include "../mw/ota/ota_layout.h"
 

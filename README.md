@@ -20,8 +20,11 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
   AppB `.start`@0x80208020（槽基址+0x20 入口约定）
 - ⬜ 上板项 G-OTA-3/4/5/6：ADS 构建烧录、SBL→App 跳转小样、写 B 换槽回滚、
   传输中断/验签失败/自检失败三种回滚路径、掉电恢复
-- ⬜ myCar（App 工程）接入：`OtaRxOps` 五类回调 + `OTABOOT_confirmSelftest`
-  自检确认 + `Lcf_AppA/AppB.lsl` 切换构建
+- ✅ myCar（App 工程）已接入（另一仓库，独立提交）：默认 lsl 换为槽 A 布局
+  （入口 0x80008020，冒烟链接验证）+ `Lcf_AppB.lsl`；`com/ota_app.c` 装配
+  OtaRxOps（槽位自识别/flash/元数据/复位/LINK_send）与 §5.2 自检确认；
+  `link.c` 分发 OTA 帧；`protocol.h` 补 PROTO_CMD_OTA_*；mw/ota、mw/crypto、
+  bsp/flash_ota 为本工程同源拷贝
 
 ## 目录结构
 
