@@ -32,3 +32,5 @@ test/host/*.o
 # ADS 后台服务生成的构建脚本（CLI 构建走 tools/build_sbl.sh）
 /SConstruct
 /site_scons/
+/.sconsign.dblite
+/build/
