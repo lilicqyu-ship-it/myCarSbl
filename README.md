@@ -56,6 +56,9 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 
 **ADS（正式）**：导入本工程直接 build —— `.cproject` 已指向 `Lcf_SBL.lsl`，
 新目录（`sbl/ bsp/ mw/`）会自动纳入构建；`test/ tools/ doc/` 已从目标构建排除。
+编译器 include 路径的第一项是工程根 `${ProjDirPath}`（`mw/...`、`bsp/...`
+这类仓库根相对包含依赖它——若 IDE 里工程是改 `.cproject` 前导入的，确认
+Project Properties → C/C++ Build → Compiler → Include paths 里能看到该条）。
 
 **命令行（验证用）**：`sh tools/build_sbl.sh`（用本机完整版 TASKING v6.3r1；
 ADS 内置版许可禁止 IDE 外运行）。产物在 `Debug/`（已 gitignore）。
