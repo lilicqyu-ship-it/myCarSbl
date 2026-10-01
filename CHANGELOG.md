@@ -7,6 +7,10 @@
 
 ## [未发布]
 
+## [1.0.0] - 2026-10-01
+
+首个稳定版 tag，对齐 `mw/app_version.h` 1.0.0；自 0.1.0 无代码变更。
+
 ## [0.1.0] - 2026-10-01
 
 首个版本 tag，对齐 `mw/app_version.h` 0.1.0。
@@ -28,5 +32,6 @@
 ### 修复
 - ADS 构建/链接：编译器 include 路径补工程根；源文件改文件相对包含 + SBL lsl 去 CPU1/2 栈
 
-[未发布]: https://github.com/lilicqyu-ship-it/tc275_sbl/compare/v0.1.0...HEAD
+[未发布]: https://github.com/lilicqyu-ship-it/tc275_sbl/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/lilicqyu-ship-it/tc275_sbl/releases/tag/v1.0.0
 [0.1.0]: https://github.com/lilicqyu-ship-it/tc275_sbl/releases/tag/v0.1.0
