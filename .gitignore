@@ -28,9 +28,9 @@ test/host/test_ota_frames
 test/host/test_ota_meta
 test/host/test_ota_rx
 test/host/*.o
-
-# ADS 后台服务生成的构建脚本（CLI 构建走 tools/build_sbl.sh）
-/SConstruct
-/site_scons/
 /.sconsign.dblite
 /build/
+
+# SCons 命令行构建（site_scons/aurix_tasking.py；如改用入库方案可删此两行）
+/SConstruct
+/site_scons/

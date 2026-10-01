@@ -65,6 +65,17 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 这类仓库根相对包含依赖它——若 IDE 里工程是改 `.cproject` 前导入的，确认
 Project Properties → C/C++ Build → Compiler → Include paths 里能看到该条）。
 
+## 固件版本（mw/app_version.h 为唯一真源）
+
+`mw/app_version.[ch]` 定义 SemVer（当前 0.1.0）。发布流程：bump 宏 → 提交 →
+打同名 git tag（如 `v0.1.0`）。SBL 无 UART 输出，版本经产物可见：
+
+- SCons（命令行构建）产物名自动带版本：`build/tasking-debug/tc275_sbl_v0.1.0.elf/.hex/.map`；
+- 产物内可检索：`strings tc275_sbl_v0.1.0.elf | grep SBLFW`（烧到板上后调试器扫内存同样可见，
+  Cpu0_Main 的 volatile 读锚点保证链接期死码消除不剔除该串）；
+- `tools/build_sbl.sh` 会在 `Debug/` 额外落一份 `tc275_sbl_v<版本>.hex` 副本。
+
+
 **SBL+App 整包**（工厂/调试器一次烧录）：
 
 ```sh

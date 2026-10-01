@@ -19,6 +19,7 @@ set -e
 CTC="/c/Program Files/TASKING/TriCore v6.3r1/ctc/bin"
 PROJ=$(pwd)
 OUT=Debug
+VER=$(python -c "import re; print(re.search(r'#define\s+APP_VERSION_STRING\s+\"([^\"]+)\"', open('mw/app_version.h').read()).group(1))")
 
 CFLAGS="-cs --misrac-version=2012 -D__CPU__=tc27xd --iso=99 --c++14 --language=+volatile --exceptions --anachronisms --fp-model=3 -O0 --tradeoff=4 --compact-max-size=200 -g -Wc-w544 -Wc-w557 -Ctc27xd -Y0 -N0 -Z0"
 INC="$PROJ/Debug/TASKING_C_C___Compiler-Include_paths__-I_.opt"
@@ -35,6 +36,7 @@ excl = set(m.group(1).split('|')) if m else set()
 out = []
 for f in ('Cpu0_Main.c', 'Cpu1_Main.c', 'Cpu2_Main.c', 'sbl_led.c',
           'sbl/sbl_boot.c', 'bsp/flash_ota.c',
+          'mw/app_version.c',
           'mw/ota/crc32.c', 'mw/ota/ota_meta.c', 'mw/ota/ota_boot.c',
           'mw/ota/tcfw_bundle.c', 'mw/ota/ota_rx.c',
           'mw/crypto/sha512.c', 'mw/crypto/ed25519v.c'):
@@ -76,6 +78,7 @@ echo "link tc275_sbl.elf ($(echo "$OBJS" | wc -l) objects)"
 
 "$CTC/elfsize" "$OUT/tc275_sbl.elf"
 echo "hex: $(ls -l $OUT/tc275_sbl.hex | awk '{print $5}') bytes"
+cp "$OUT/tc275_sbl.hex" "$OUT/tc275_sbl_v${VER}.hex"    # 版本化副本（SCons 构建同名约定）
 
 if [ -n "$1" ]; then
     python tools/merge_hex.py "$OUT/factory_full.hex" "$OUT/tc275_sbl.hex" "$1"

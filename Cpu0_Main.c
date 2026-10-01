@@ -36,6 +36,7 @@
 #include "IfxScuWdt.h"
 #include "sbl_led.h"
 #include "sbl/sbl_boot.h"
+#include "mw/app_version.h"
 
 /* Referenced by the Cpu1/Cpu2 template mains (kept compiled, never started:
  * the App releases the cores, not the SBL). */
@@ -55,6 +56,13 @@ int core0_main(void)
     IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
 
     initLED();      /* decision signalling + safe-mode blink (P00.5) */
+
+    /* 锚定版本串 g_sbl_version：volatile 读是副作用，任何优化级别下都
+     * 不可剔除，从而躲过链接期死码消除（-Wl-Oc），产物内 "SBLFW ..." 可检索。 */
+    {
+        volatile char v0 = g_sbl_version[0];
+        (void)v0;
+    }
 
     SBL_boot();     /* never returns */
 
