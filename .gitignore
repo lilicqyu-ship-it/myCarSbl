@@ -33,3 +33,6 @@ test/host/*.o
 
 # SCons Python 缓存
 site_scons/__pycache__/
+
+*.pyc
+__pycache__/
