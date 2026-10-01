@@ -64,6 +64,19 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 这类仓库根相对包含依赖它——若 IDE 里工程是改 `.cproject` 前导入的，确认
 Project Properties → C/C++ Build → Compiler → Include paths 里能看到该条）。
 
+**SBL+App 整包**（工厂/调试器一次烧录）：
+
+```sh
+# 两边各自构建出 hex 后：
+python tools/merge_hex.py Debug/factory_full.hex Debug/myCarSbl.hex <myCar的AppA.hex>
+# 或构建 SBL 时直接带参：
+sh tools/build_sbl.sh "../myCar/TriCore Debug (TASKING)/myCar.hex"
+# 可选 --bin Debug/factory_full.bin 输出整片二进制（空隙 0xFF 填充）
+```
+
+两个镜像各自独立链接（各有 CStart/库），在 Intel-HEX 层合并；工具校验
+地址重叠（重叠即报错拒绝），合并后入口 = SBL 的 0x80000020。
+
 **命令行（验证用）**：`sh tools/build_sbl.sh`（用本机完整版 TASKING v6.3r1；
 ADS 内置版许可禁止 IDE 外运行）。脚本自带完整源集（含 iLLD 子集，从
 `.cproject` 排除表解析），Clean 后也能独立出产物。产物在 `Debug/`（已
@@ -81,8 +94,9 @@ ed25519 参考实现与 dev 密钥；`test_vectors.h` 已提交，格式或密�
 
 ## 首次上板步骤（G-OTA-3 起）
 
-1. ADS 构建 SBL → 烧 `Debug/myCarSbl.hex`（含 BMHD0，reset 有效）
-2. 调试器把 AppA 版 App（myCar + `Lcf_AppA.lsl`）镜像写入 0x80008000 区
+1. ADS 分别构建 SBL 与 myCar（槽 A 布局，产物即 AppA hex）
+2. 合成整包 `Debug/factory_full.hex`（SBL@0x80000000 + AppA@0x80008000，
+   见上节），调试器/AURIXFlasher 一次烧录即可；也可分开烧两个 hex
 3. 上电：无元数据时 SBL 探测 Slot A 入口非擦除态 → 闪 1 下 → 跳 A
    （`SBL_ALLOW_FIRST_BOOT`，首次 OTA 后即由元数据接管）
 4. App 内接入 `OTARX_init` + 自检 `OTABOOT_confirmSelftest`，C6 推 TCFW 走 §5.3

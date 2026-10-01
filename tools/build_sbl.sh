@@ -11,7 +11,9 @@
 # support standalone"); the full TASKING v6.3r1 install on this bench does.
 # Newer major version than ADS's 1.1r8 - this build is a compile/link
 # validation, the authoritative binary still comes from ADS.
-# Run from the repo root:  sh tools/build_sbl.sh
+# Optional argument: path to an App slot-A hex (e.g. myCar's build output);
+# the script then also emits Debug/factory_full.hex = SBL + App in ONE file
+# for whole-chip flashing:  sh tools/build_sbl.sh ../myCar/"TriCore Debug (TASKING)"/myCar.hex
 set -e
 
 CTC="/c/Program Files/TASKING/TriCore v6.3r1/ctc/bin"
@@ -74,3 +76,7 @@ echo "link myCarSbl.elf ($(echo "$OBJS" | wc -l) objects)"
 
 "$CTC/elfsize" "$OUT/myCarSbl.elf"
 echo "hex: $(ls -l $OUT/myCarSbl.hex | awk '{print $5}') bytes"
+
+if [ -n "$1" ]; then
+    python tools/merge_hex.py "$OUT/factory_full.hex" "$OUT/myCarSbl.hex" "$1"
+fi
