@@ -1,5 +1,7 @@
 # tc275_sbl — TC275 OTA 二级引导（SBL）工程
 
+[![CI](https://github.com/lilicqyu-ship-it/tc275_sbl/actions/workflows/ci.yml/badge.svg)](https://github.com/lilicqyu-ship-it/tc275_sbl/actions/workflows/ci.yml) [![version](https://img.shields.io/github/v/tag/lilicqyu-ship-it/tc275_sbl?label=version&sort=semver)](https://github.com/lilicqyu-ship-it/tc275_sbl/tags)
+
 智能车 TC275 主控的 OTA 升级引导程序：上电由 SBL 接管 reset 向量，读取
 DFlash 中的 OTA 元数据，决定跳入 PFlash 双 bank（Slot A / Slot B）中的哪个
 App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
