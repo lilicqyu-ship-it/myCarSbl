@@ -15,6 +15,8 @@
 # 工具链查找：TASKING_TRICORE_HOME / TASKING_HOME 环境变量
 #   -> C:\Program Files\TASKING\TriCore v6.3*（取最新 6.3.x）
 
+import os
+
 import aurix_tasking
 
 CONFIGS = {
@@ -25,6 +27,10 @@ CONFIGS = {
 variant = ARGUMENTS.get('cfg', 'debug')
 if variant not in CONFIGS:
     Abort('cfg=%s 未知，可选: %s' % (variant, ', '.join(CONFIGS)))
+
+# SCons 签名库收进构建目录：默认落在工程根（.sconsign.dblite），根目录必须保持干净
+os.makedirs('build', exist_ok=True)
+SConsignFile(os.path.join('build', '.sconsign.dblite'))
 
 env = Environment()
 aurix_tasking.generate(env)   # 覆盖 CC/LINK/CCCOM 等为 TASKING cctc

@@ -28,7 +28,7 @@ test/host/test_ota_frames
 test/host/test_ota_meta
 test/host/test_ota_rx
 test/host/*.o
-/.sconsign.dblite
+/cc[0-9a-f]*
 /build/
 
 # SCons Python 缓存
