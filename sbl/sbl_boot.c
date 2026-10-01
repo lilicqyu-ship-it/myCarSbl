@@ -9,16 +9,16 @@
  *                         room (doc 24: "点错误 LED，等 UART 重刷" - the UART
  *                         reflash channel itself is App-side, not in the SBL)
  */
-#include "sbl/sbl_boot.h"
+#include "sbl_boot.h"
 
 #include <string.h>
 
 #include "Bsp.h"
 #include "IfxPort.h"
-#include "bsp/flash_ota.h"
-#include "mw/ota/ota_boot.h"
-#include "mw/ota/ota_layout.h"
-#include "mw/ota/ota_meta.h"
+#include "../bsp/flash_ota.h"
+#include "../mw/ota/ota_boot.h"
+#include "../mw/ota/ota_layout.h"
+#include "../mw/ota/ota_meta.h"
 
 /* P00.5, the lite kit LED (same pin Blinky_LED.c drives), active low. */
 #define SBL_LED_PORT       &MODULE_P00

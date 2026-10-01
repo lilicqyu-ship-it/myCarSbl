@@ -38,8 +38,8 @@
 
 #include <stdint.h>
 
-#include "mw/crypto/sha512.h"
-#include "mw/ota/ota_layout.h"
+#include "../crypto/sha512.h"
+#include "ota_layout.h"
 
 #ifdef __cplusplus
 extern "C" {

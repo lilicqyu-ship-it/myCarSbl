@@ -18,7 +18,7 @@
 #define OTA_BOOT_H
 
 #include <stdint.h>
-#include "mw/ota/ota_meta.h"
+#include "ota_meta.h"
 
 #ifdef __cplusplus
 extern "C" {

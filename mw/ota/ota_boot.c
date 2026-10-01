@@ -1,7 +1,7 @@
 /*
  * ota_boot.c - the doc 24 §5.1 boot ladder over OtaMeta
  */
-#include "mw/ota/ota_boot.h"
+#include "ota_boot.h"
 
 static uint8_t boot_slotState(const OtaMeta *m, uint8_t slot)
 {

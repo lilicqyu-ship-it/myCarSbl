@@ -1,11 +1,11 @@
 /*
  * ota_meta.c - OtaMeta wire codec + double-page store (doc 24 §4)
  */
-#include "mw/ota/ota_meta.h"
+#include "ota_meta.h"
 
 #include <string.h>
 
-#include "mw/ota/crc32.h"
+#include "crc32.h"
 
 /* ---- LE field helpers (TriCore is big-endian; never cast the struct) ------- */
 

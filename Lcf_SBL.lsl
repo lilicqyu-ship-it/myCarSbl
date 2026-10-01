@@ -30,14 +30,6 @@
 #define LCF_USTACK0_SIZE    2k
 #define LCF_ISTACK0_SIZE    1k
 
-#define LCF_CSA1_SIZE       1k
-#define LCF_USTACK1_SIZE    1k
-#define LCF_ISTACK1_SIZE    512
-
-#define LCF_CSA2_SIZE       1k
-#define LCF_USTACK2_SIZE    1k
-#define LCF_ISTACK2_SIZE    512
-
 #define LCF_HEAP_SIZE       4k
 
 #define LCF_CPU0            0
@@ -45,9 +37,8 @@
 #define LCF_CPU2            2
 
 /*Un comment one of the below statements to enable CpuX DMI RAM to hold global variables*/
-/*#define LCF_DEFAULT_HOST  LCF_CPU0*/
-#define LCF_DEFAULT_HOST    LCF_CPU1
-/*#define LCF_DEFAULT_HOST  LCF_CPU2*/
+/* SBL default data host is CPU0: single-core program, CPU1/2 never start */
+#define LCF_DEFAULT_HOST    LCF_CPU0
 
 #define LCF_DSPR2_START     0x50000000
 #define LCF_DSPR2_SIZE      120k
@@ -58,21 +49,13 @@
 #define LCF_DSPR0_START     0x70000000
 #define LCF_DSPR0_SIZE      112k
 
-#define LCF_CSA2_OFFSET     (LCF_DSPR2_SIZE - 1k - LCF_CSA2_SIZE)
-#define LCF_ISTACK2_OFFSET  (LCF_CSA2_OFFSET - 256 - LCF_ISTACK2_SIZE)
-#define LCF_USTACK2_OFFSET  (LCF_ISTACK2_OFFSET - 256 - LCF_USTACK2_SIZE)
 
-#define LCF_CSA1_OFFSET     (LCF_DSPR1_SIZE - 1k - LCF_CSA1_SIZE)
-#define LCF_ISTACK1_OFFSET  (LCF_CSA1_OFFSET - 256 - LCF_ISTACK1_SIZE)
-#define LCF_USTACK1_OFFSET  (LCF_ISTACK1_OFFSET - 256 - LCF_USTACK1_SIZE)
 
 #define LCF_CSA0_OFFSET     (LCF_DSPR0_SIZE - 1k - LCF_CSA0_SIZE)
 #define LCF_ISTACK0_OFFSET  (LCF_CSA0_OFFSET - 256 - LCF_ISTACK0_SIZE)
 #define LCF_USTACK0_OFFSET  (LCF_ISTACK0_OFFSET - 256 - LCF_USTACK0_SIZE)
 
 #define LCF_HEAP0_OFFSET    (LCF_USTACK0_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP1_OFFSET    (LCF_USTACK1_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP2_OFFSET    (LCF_USTACK2_OFFSET - LCF_HEAP_SIZE)
 
 #define LCF_INTVEC0_START   0x80000400
 #define LCF_TRAPVEC0_START  0x80000100
@@ -251,10 +234,6 @@ derivative tc27D
     {
         stack "ustack_tc0" (min_size = 1k, fixed, align = 8);
         stack "istack_tc0" (min_size = 1k, fixed, align = 8);
-        stack "ustack_tc1" (min_size = 1k, fixed, align = 8);
-        stack "istack_tc1" (min_size = 1k, fixed, align = 8);
-        stack "ustack_tc2" (min_size = 1k, fixed, align = 8);
-        stack "istack_tc2" (min_size = 1k, fixed, align = 8);
     }
     
     /*Section setup for the copy table*/
@@ -416,43 +395,25 @@ derivative tc27D
             heap "heap" (size = LCF_HEAP_SIZE);
         }
     
-        group (ordered, align = 8, run_addr = mem:dsram2[LCF_USTACK2_OFFSET])
-        {
-            stack "ustack_tc2" (size = LCF_USTACK2_SIZE);
-        }
-        "__USTACK2":=   "_lc_ue_ustack_tc2";
-        "__USTACK2_END":=   "_lc_ub_ustack_tc2";
+        /* CPU1/2 have no stack/CSA sections in the SBL: those cores are
+         * never started here (Ifx_Cfg.h), so the sections would be dead,
+         * removed by the linker, and ADS's older ltc then fails evaluating
+         * the aliases below. Resolve them to plain (never dereferenced)
+         * DSPR addresses instead; only dead code in IfxCpu_CStart1/2.o
+         * references these symbols. */
+        "__USTACK2"    := 0x5001E000;
+        "__USTACK2_END":= 0x5001D800;
+        "__ISTACK2"    := 0x5001D7F8;
+        "__ISTACK2_END":= 0x5001D7F0;
+        "__CSA2"       := 0x5001E400;
+        "__CSA2_END"   := 0x5001EC00;
         
-        group (ordered, align = 8, run_addr = mem:dsram2[LCF_ISTACK2_OFFSET])
-        {
-            stack "istack_tc2" (size = LCF_ISTACK2_SIZE);
-        }
-        "__ISTACK2":=   "_lc_ue_istack_tc2";
-        "__ISTACK2_END":=   "_lc_ub_istack_tc2";
-        
-        group (ordered, align = 64, attributes=rw, run_addr=mem:dsram2[LCF_CSA2_OFFSET]) 
-            reserved "csa_tc2" (size = LCF_CSA2_SIZE);
-        "__CSA2":=      "_lc_ub_csa_tc2";
-        "__CSA2_END":=  "_lc_ue_csa_tc2";
-        
-        group (ordered, align = 8, run_addr = mem:dsram1[LCF_USTACK1_OFFSET])
-        {
-            stack "ustack_tc1" (size = LCF_USTACK1_SIZE);
-        }
-        "__USTACK1":=   "_lc_ue_ustack_tc1";
-        "__USTACK1_END":=   "_lc_ub_ustack_tc1";
-        
-        group (ordered, align = 8, run_addr = mem:dsram1[LCF_ISTACK1_OFFSET])
-        {
-            stack "istack_tc1" (size = LCF_ISTACK1_SIZE);
-        }
-        "__ISTACK1":=   "_lc_ue_istack_tc1";
-        "__ISTACK1_END":=   "_lc_ub_istack_tc1";
-        
-        group  (ordered, align = 64, attributes=rw, run_addr=mem:dsram1[LCF_CSA1_OFFSET]) 
-                    reserved "csa_tc1" (size = LCF_CSA1_SIZE);
-        "__CSA1":=      "_lc_ub_csa_tc1";
-        "__CSA1_END":=  "_lc_ue_csa_tc1";
+        "__USTACK1"    := 0x6001E000;
+        "__USTACK1_END":= 0x6001D800;
+        "__ISTACK1"    := 0x6001D7F8;
+        "__ISTACK1_END":= 0x6001D7F0;
+        "__CSA1"       := 0x6001E400;
+        "__CSA1_END"   := 0x6001EC00;
 
         group (ordered, align = 8, run_addr = mem:dsram0[LCF_USTACK0_OFFSET])
         {

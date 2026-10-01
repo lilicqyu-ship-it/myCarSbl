@@ -2,7 +2,7 @@
  * crc32.c - CRC-32 (IEEE 802.3 / zlib): poly 0xEDB88320 (reflected),
  * init 0xFFFFFFFF, final xor 0xFFFFFFFF. check("123456789") == 0xCBF43926.
  */
-#include "mw/ota/crc32.h"
+#include "crc32.h"
 
 static uint32_t s_table[256];
 static uint8_t  s_tableReady;

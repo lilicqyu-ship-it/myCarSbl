@@ -20,7 +20,7 @@ PORTABLE = \
     ../../mw/ota/ota_rx.c \
     ../../mw/crypto/sha512.c \
     ../../mw/crypto/ed25519v.c \
-    ../../mw/sf/sf_frame.c \
+    sf_frame.c \
     mock_ota.c
 
 TESTS = test_tcfw test_ota_frames test_ota_meta test_ota_boot test_ota_rx

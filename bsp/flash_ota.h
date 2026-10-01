@@ -31,7 +31,7 @@
 #include <stdint.h>
 
 #include "Ifx_Types.h"
-#include "mw/ota/ota_meta.h"
+#include "../mw/ota/ota_meta.h"
 
 #ifdef __cplusplus
 extern "C" {

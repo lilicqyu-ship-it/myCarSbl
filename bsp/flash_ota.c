@@ -6,14 +6,14 @@
  * writePage -> waitUnbusy, eraseSector -> waitUnbusy), extended for the
  * 32-byte PFlash page (4 x loadPage2X32) and the per-bank busy bits.
  */
-#include "bsp/flash_ota.h"
+#include "flash_ota.h"
 
 #include <string.h>
 
 #include "Bsp.h"
 #include "IfxFlash.h"
 #include "IfxFlash_cfg.h"
-#include "mw/ota/ota_layout.h"
+#include "../mw/ota/ota_layout.h"
 
 /* Erase/program worst case is a couple of hundred ms per PFlash sector
  * (TC27x datasheet); the budget exists so a stuck FMU surfaces as a FALSE

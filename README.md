@@ -32,7 +32,8 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 | `bsp/flash_ota.[ch]` | IfxFlash 封装：槽扇区擦除、32B 页 staging 写、DFlash 元数据后端、入口探测 |
 | `mw/ota/` | 可移植 OTA 栈（纯 C99，host/TriCore 同源编译）：`ota_layout.h` 地址真源、`ota_meta` 双页、`ota_boot` 决策、`tcfw_bundle` 验签、`ota_rx` 接收状态机、`crc32`、`ota_keys.h` 公钥 |
 | `mw/crypto/` | `ed25519v`/`sha512`/`c6_consts` — 自 c6_car 逐字拷贝（验签与 C6 共用真源） |
-| `mw/sf/sf_frame.[ch]` | SF 帧编解码 — 自 myCar 逐字拷贝（线格式真源） |
+| `mw/sf/sf_frame.h` | SF 帧编码头 — 自 myCar 逐字拷贝（线格式真源） |
+| `test/host/sf_frame.c` | SF 帧编解码实现 — 同样逐字拷贝；只由 host 测试编译（myCar 有自己的正本，SBL 镜像不引用） |
 | `Lcf_SBL.lsl` | **本工程构建用**：SBL 定位 32 KB（0x80000000..0x80007FFF） |
 | `Lcf_AppA.lsl` / `Lcf_AppB.lsl` | App 槽 linker（给 myCar 工程切换构建；App 不占物理 reset） |
 | `test/host/` | host 单测 + mock 后端 + `make check` |
@@ -61,7 +62,9 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 Project Properties → C/C++ Build → Compiler → Include paths 里能看到该条）。
 
 **命令行（验证用）**：`sh tools/build_sbl.sh`（用本机完整版 TASKING v6.3r1；
-ADS 内置版许可禁止 IDE 外运行）。产物在 `Debug/`（已 gitignore）。
+ADS 内置版许可禁止 IDE 外运行）。脚本自带完整源集（含 iLLD 子集，从
+`.cproject` 排除表解析），Clean 后也能独立出产物。产物在 `Debug/`（已
+gitignore）。
 
 **host 单测**：
 

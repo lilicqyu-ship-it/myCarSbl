@@ -38,8 +38,8 @@
 
 #include <stdint.h>
 
-#include "mw/ota/ota_layout.h"
-#include "mw/ota/tcfw_bundle.h"
+#include "ota_layout.h"
+#include "tcfw_bundle.h"
 
 #ifdef __cplusplus
 extern "C" {

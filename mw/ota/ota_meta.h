@@ -20,7 +20,7 @@
 #define OTA_META_H
 
 #include <stdint.h>
-#include "mw/ota/ota_layout.h"
+#include "ota_layout.h"
 
 #ifdef __cplusplus
 extern "C" {

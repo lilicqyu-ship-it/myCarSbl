@@ -1,13 +1,13 @@
 /*
  * ota_rx.c - the doc 24 §5.3 receive state machine over injected ops
  */
-#include "mw/ota/ota_rx.h"
+#include "ota_rx.h"
 
 #include <string.h>
 
-#include "mw/crypto/sha512.h"
-#include "mw/ota/crc32.h"
-#include "mw/sf/sf_frame.h"
+#include "../crypto/sha512.h"
+#include "crc32.h"
+#include "../sf/sf_frame.h"
 
 /* Read-back window for the post-flash digest check: SHA-512 over the written
  * image straight out of the slot. 4 KB keeps the stack flat on a core with a

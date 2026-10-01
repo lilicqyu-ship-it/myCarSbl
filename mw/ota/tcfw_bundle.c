@@ -6,11 +6,11 @@
  * TCFW magic, the single-payload layout, an explicit I/O error state for
  * flash write failures, and no heap - the caller owns the context.
  */
-#include "mw/ota/tcfw_bundle.h"
+#include "tcfw_bundle.h"
 
 #include <string.h>
 
-#include "mw/crypto/ed25519v.h"
+#include "../crypto/ed25519v.h"
 
 static uint32_t tcfw_getU16(const uint8_t *p)
 {
