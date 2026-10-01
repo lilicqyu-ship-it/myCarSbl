@@ -28,3 +28,7 @@ test/host/test_ota_frames
 test/host/test_ota_meta
 test/host/test_ota_rx
 test/host/*.o
+
+# ADS 后台服务生成的构建脚本（CLI 构建走 tools/build_sbl.sh）
+/SConstruct
+/site_scons/
