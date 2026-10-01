@@ -40,7 +40,8 @@ App 镜像，并在升级失败时自动回滚，保证车辆不变砖。
 | `Lcf_SBL.lsl` | **本工程构建用**：SBL 定位 32 KB（0x80000000..0x80007FFF） |
 | `Lcf_AppA.lsl` / `Lcf_AppB.lsl` | App 槽 linker（给 tc275_car 工程切换构建；App 不占物理 reset） |
 | `test/host/` | host 单测 + mock 后端 + `make check` |
-| `tools/` | `gen_test_vectors.py`（TCFW 测试向量）、`build_sbl.sh`（命令行编译验证） |
+| `tools/` | `flash.py`（DAS/AURIXFlasher 烧录）、`merge_hex.py`（SBL+App 整包合成）、`gen_test_vectors.py`（TCFW 测试向量） |
+| `SConstruct`、`site_scons/` | SCons 命令行构建（与 ADS 工程同源：解析 `.cproject`，详见 SConstruct 头注释） |
 | `Cpu1/2_Main.c` | 模板遗留（SBL 不启动 CPU1/2，保留以提供 g_cpuSyncEvent 同步事件） |
 | `sbl_led.c/h` | 原 Blinky_LED 模板改名；LED 决策指示/安全模式闪烁在用（Cpu0 调 initLED） |
 | `Libraries/`、`Configurations/` | Infineon iLLD（TC27D）与芯片配置 |
@@ -73,17 +74,14 @@ Project Properties → C/C++ Build → Compiler → Include paths 里能看到�
 - SCons（命令行构建）产物名自动带版本：`build/tasking-debug/tc275_sbl_v0.1.0.elf/.hex/.map`；
 - 产物内可检索：`strings tc275_sbl_v0.1.0.elf | grep SBLFW`（烧到板上后调试器扫内存同样可见，
   Cpu0_Main 的 volatile 读锚点保证链接期死码消除不剔除该串）；
-- `tools/build_sbl.sh` 会在 `Debug/` 额外落一份 `tc275_sbl_v<版本>.hex` 副本。
 
 
 **SBL+App 整包**（工厂/调试器一次烧录）：
 
 ```sh
-# 两边各自构建出 hex 后：
-python tools/merge_hex.py Debug/factory_full.hex Debug/tc275_sbl.hex <tc275_car的AppA.hex>
-# 或构建 SBL 时直接带参：
-sh tools/build_sbl.sh "../tc275_car/TriCore Debug (TASKING)/tc275_car.hex"
-# 可选 --bin Debug/factory_full.bin 输出整片二进制（空隙 0xFF 填充）
+# 两边各自构建出 hex 后（SCons 产物名带版本，版本号见 mw/app_version.h）：
+python tools/merge_hex.py build/tasking-debug/factory_full.hex        build/tasking-debug/tc275_sbl_v0.1.0.hex        "../tc275_car/TriCore Debug (TASKING)/tc275_car.hex"
+# 可选 --bin build/tasking-debug/factory_full.bin 输出整片二进制（空隙 0xFF 填充）
 ```
 
 两个镜像各自独立链接（各有 CStart/库），在 Intel-HEX 层合并；工具校验
@@ -104,10 +102,11 @@ OTA 槽）、烧后校验并复位运行；`--id <n>` 选 DAS 端口，`--log x.
 详细日志；底层原始参数（`-connect 0|6`、`-ucb`、TAS `-script` 等）见
 `python tools/flash.py --help` 与 AURIXFlasher 的用法。
 
-**命令行（验证用）**：`sh tools/build_sbl.sh`（用本机完整版 TASKING v6.3r1；
-ADS 内置版许可禁止 IDE 外运行）。脚本自带完整源集（含 iLLD 子集，从
-`.cproject` 排除表解析），Clean 后也能独立出产物。产物在 `Debug/`（已
-gitignore）。
+**命令行（SCons，自动化唯一入口）**：`python -m SCons`（需本机完整版
+TASKING v6.3r1，ADS 内置版许可禁止 IDE 外运行）。源集/include/宏直接解析
+`.cproject`，与 ADS 同源零漂移；产物在 `build/tasking-<cfg>/`（已 gitignore），
+文件名自动携带版本（`tc275_sbl_vX.Y.Z.elf/.hex/.map`）。用法：`scons cfg=release`、
+`scons opt=-O2`、`scons size`、`scons -c`（详见 SConstruct 头注释）。
 
 **host 单测**：
 

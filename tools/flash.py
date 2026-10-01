@@ -16,7 +16,7 @@ is that thin wrapper plus two conveniences for the OTA layout:
 
 Examples:
   python tools/flash.py devices
-  python tools/flash.py flash Debug/tc275_sbl.hex
+  python tools/flash.py flash   # 默认取 SCons 产物 build/tasking-*/ 下最新 hex
   python tools/flash.py flash "TriCore Debug (TASKING)/tc275_car.hex" --id 0
   python tools/flash.py factory "../tc275_car/TriCore Debug (TASKING)/tc275_car.hex"
 
@@ -29,12 +29,29 @@ Raw CLI (what this passes through), notable options:
   -script <txt>      TAS script (INIT/COPY/SET/WAIT/RESET/LOAD/VERIFY/FLASH/ERASE)
 """
 import argparse
+import glob
 import os
 import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
+
+# SCons 产物（带版本名，取 mtime 最新的 hex；退回 ADS 的 Debug/）
+SBL_HEX_CANDIDATES = [
+    os.path.join(REPO, 'build', 'tasking-*', 'tc275_sbl_v*.hex'),
+    os.path.join(REPO, 'build', 'tasking-*', 'tc275_sbl.hex'),
+    os.path.join(REPO, 'Debug', 'tc275_sbl.hex'),
+]
+
+
+def default_sbl_hex():
+    for pat in SBL_HEX_CANDIDATES:
+        hits = sorted(glob.glob(pat), key=os.path.getmtime)
+        if hits:
+            return hits[-1]
+    return SBL_HEX_CANDIDATES[-1]
+
 
 DEFAULT_EXE_SEARCH = [
     r'C:\Infineon\AURIX-Studio-1.10.40\tools\AurixFlasherSoftwareTool_v3.0.18\AURIXFlasher.exe',
@@ -96,7 +113,7 @@ def cmd_flash(exe, a):
 
 
 def cmd_factory(exe, a):
-    sbl = a.sbl if a.sbl else os.path.join(REPO, 'Debug', 'tc275_sbl.hex')
+    sbl = a.sbl if a.sbl else default_sbl_hex()
     if not os.path.isfile(sbl):
         sys.exit('SBL hex not found: %s (build the SBL first)' % sbl)
     if not os.path.isfile(a.app):
@@ -141,8 +158,8 @@ def main():
 
     p_fact = sub.add_parser('factory', help='merge SBL+App hex and flash it')
     p_fact.add_argument('app', help='App slot-A hex (e.g. tc275_car build output)')
-    p_fact.add_argument('--sbl', help='SBL hex (default Debug/tc275_sbl.hex)')
-    p_fact.add_argument('--out', default=os.path.join(REPO, 'Debug', 'factory_full.hex'),
+    p_fact.add_argument('--sbl', help='SBL hex (default: newest build/tasking-*/tc275_sbl_v*.hex)')
+    p_fact.add_argument('--out', default=os.path.join(REPO, 'build', 'tasking-debug', 'factory_full.hex'),
                         help='merged file to flash')
 
     a = ap.parse_args()
