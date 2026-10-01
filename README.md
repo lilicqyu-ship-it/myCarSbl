@@ -77,6 +77,21 @@ sh tools/build_sbl.sh "../myCar/TriCore Debug (TASKING)/myCar.hex"
 两个镜像各自独立链接（各有 CStart/库），在 Intel-HEX 层合并；工具校验
 地址重叠（重叠即报错拒绝），合并后入口 = SBL 的 0x80000020。
 
+**命令行烧录**（`tools/flash.py`，封装 ADS 自带 AURIXFlasher 的 CLI，
+需 DAS 服务在跑——ADS 装好即有）：
+
+```sh
+python tools/flash.py devices                                   # 支持的器件列表
+python tools/flash.py flash Debug/myCarSbl.hex                  # 单独烧 SBL
+python tools/flash.py factory "../myCar/TriCore Debug (TASKING)/myCar.hex"
+                                                                # 合成+整包烧录一步到位
+```
+
+默认 `-erase on`（只擦镜像覆盖的逻辑扇区——烧 SBL/App 不会误清另一个
+OTA 槽）、烧后校验并复位运行；`--id <n>` 选 DAS 端口，`--log x.xml` 出
+详细日志；底层原始参数（`-connect 0|6`、`-ucb`、TAS `-script` 等）见
+`python tools/flash.py --help` 与 AURIXFlasher 的用法。
+
 **命令行（验证用）**：`sh tools/build_sbl.sh`（用本机完整版 TASKING v6.3r1；
 ADS 内置版许可禁止 IDE 外运行）。脚本自带完整源集（含 iLLD 子集，从
 `.cproject` 排除表解析），Clean 后也能独立出产物。产物在 `Debug/`（已
