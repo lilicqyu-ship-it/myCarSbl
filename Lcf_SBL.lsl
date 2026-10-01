@@ -507,6 +507,16 @@ derivative tc27D
         {
             select "*.interface_const";
         }
+        /* SBL version string at a FIXED code-flash address (0x80007E00, the
+         * tail of the 32KB SBL region). SBL code grows upward from 0x80000000,
+         * so a tail-pinned block never moves. The App (tc275_car) reads the
+         * version directly at this address, magic prefix "SBLFW"; see
+         * mw/app_version.h (SBL_VERSION_ADDR). NOTE: ltc rejects non-ASCII
+         * inside LSL comments - keep this block English only. */
+        group  sbl_version (ordered, run_addr=0x80007E00)
+        {
+            select "*.sbl_version";
+        }
         "__IF_CONST" := addressof(group:ainterface_const);
         group  a1 (ordered, run_addr=mem:sblfls0)
         {

@@ -74,6 +74,8 @@ Project Properties → C/C++ Build → Compiler → Include paths 里能看到�
 - SCons（命令行构建）产物名自动带版本：`build/tasking-debug/tc275_sbl_v0.1.0.elf/.hex/.map`；
 - 产物内可检索：`strings tc275_sbl_v0.1.0.elf | grep SBLFW`（烧到板上后调试器扫内存同样可见，
   Cpu0_Main 的 volatile 读锚点保证链接期死码消除不剔除该串）；
+- **固定地址 0x80007E00**：`.sbl_version` 组由 `Lcf_SBL.lsl` 定死在 32KB SBL 区尾部
+  （`#pragma section farrom "sbl_version"` 声明），App 从该地址直读 SBL 版本（见下）。
 
 
 **SBL+App 整包**（工厂/调试器一次烧录）：
